@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer'); // v13.0.0 or later
 
 (async () => {
-	const browser = await puppeteer.launch();
+	const browser = await puppeteer.launch({headless: false});
 	const page = await browser.newPage();
 	const timeout = 5000;
 	page.setDefaultTimeout(timeout);
@@ -9,15 +9,18 @@ const puppeteer = require('puppeteer'); // v13.0.0 or later
 	{
 		const targetPage = page;
 		await targetPage.setViewport({
-			width: 1110,
-			height: 1099
+			width: 1000,
+			height: 900
 		})
 	}
+
+	// search
 	{
-		const timeout = 2000;
 		const targetPage = page;
 		await targetPage.goto('https://pl.wikipedia.org/w/index.php?sort=last_edit_asc&search=insource%3A%27imdb.com%2Fname%27+insource%3A%2F%5C%5Bhttps%3F%3A%5C%2F%5C%2Fwww%5C.imdb%5C.com%5C%2Fname%5C%2Fnm%5B0-9a-z%5D%2B%5C%2F+%2F&title=Specjalna:Szukaj&profile=advanced&fulltext=1&ns0=1&ns6=1&ns8=1&ns10=1&ns14=1&ns100=1');
 	}
+
+	// get item for edit
 	{
 		const targetPage = page;
 		await scrollIntoViewIfNeeded([
@@ -29,40 +32,23 @@ const puppeteer = require('puppeteer'); // v13.0.0 or later
 			timeout,
 			visible: true
 		});
-		await element.click({
-			offset: {
-				x: 19.03125,
-				y: 8.1875,
-			},
+		// click that navigates breaks puppeteer :-/
+		// await element.click({
+		// 	offset: {
+		// 		x: 19.03125,
+		// 		y: 8.1875,
+		// 	},
+		// });
+		// go directly to edit
+		// TODO: open this in new tab instead (so we can close tabs in a loop)
+		let url = await page.evaluate(() => {
+			return document.querySelector('div.searchresults li:nth-of-type(1) a').href;
 		});
+		url += '?action=edit';
+		await targetPage.goto(url);
 	}
-	{
-		const targetPage = page;
-		await waitForElement({
-			type: 'waitForElement',
-			selectors: [
-				'#ca-edit a'
-			]
-		}, targetPage, timeout);
-	}
-	{
-		const targetPage = page;
-		await scrollIntoViewIfNeeded([
-			'#ca-edit a'
-		], targetPage, timeout);
-		const element = await waitForSelectors([
-			'#ca-edit a'
-		], targetPage, {
-			timeout,
-			visible: true
-		});
-		await element.click({
-			offset: {
-				x: 26.46875,
-				y: 8.484375,
-			},
-		});
-	}
+
+	// run WP:SK
 	{
 		const timeout = 2000;
 		const targetPage = page;
@@ -92,6 +78,8 @@ const puppeteer = require('puppeteer'); // v13.0.0 or later
 			},
 		});
 	}
+
+	// check if summary was added
 	{
 		const timeout = 3000;
 		const targetPage = page;
@@ -99,6 +87,8 @@ const puppeteer = require('puppeteer'); // v13.0.0 or later
 			timeout
 		});
 	}
+
+	// save
 	{
 		const targetPage = page;
 		await scrollIntoViewIfNeeded([
@@ -118,7 +108,7 @@ const puppeteer = require('puppeteer'); // v13.0.0 or later
 		});
 	}
 
-	await browser.close();
+	// await browser.close();
 
 	async function waitForSelectors(selectors, frame, options) {
 		for (const selector of selectors) {
