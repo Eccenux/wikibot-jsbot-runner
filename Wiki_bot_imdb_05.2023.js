@@ -6,10 +6,16 @@ import {
 	waitForElement,
 } from './chromeBase.js'
 
+import {
+	wsUrl,
+} from './chrome.config.js'
+
 (async () => {
-	const browser = await puppeteer.launch({
-		headless: false
+	// connect to current (open) Chrome window
+	const browser = await puppeteer.connect({
+		browserWSEndpoint: wsUrl,
 	});
+
 	const page = await browser.newPage();
 	const timeout = 5000;
 	page.setDefaultTimeout(timeout);
@@ -17,7 +23,7 @@ import {
 	{
 		const targetPage = page;
 		await targetPage.setViewport({
-			width: 1000,
+			width: 1200,
 			height: 900
 		})
 	}
