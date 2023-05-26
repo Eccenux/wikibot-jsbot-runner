@@ -16,12 +16,12 @@ import {
 		browserWSEndpoint: wsUrl,
 	});
 
-	const page = await browser.newPage();
+	const searchPage = await browser.newPage();
 	const timeout = 5000;
-	page.setDefaultTimeout(timeout);
+	searchPage.setDefaultTimeout(timeout);
 
 	{
-		const targetPage = page;
+		const targetPage = searchPage;
 		await targetPage.setViewport({
 			width: 1200,
 			height: 900
@@ -30,13 +30,14 @@ import {
 
 	// search
 	{
-		const targetPage = page;
+		const targetPage = searchPage;
 		await targetPage.goto('https://pl.wikipedia.org/w/index.php?sort=last_edit_asc&search=insource%3A%27imdb.com%2Fname%27+insource%3A%2F%5C%5Bhttps%3F%3A%5C%2F%5C%2Fwww%5C.imdb%5C.com%5C%2Fname%5C%2Fnm%5B0-9a-z%5D%2B%5C%2F+%2F&title=Specjalna:Szukaj&profile=advanced&fulltext=1&ns0=1&ns6=1&ns8=1&ns10=1&ns14=1&ns100=1');
 	}
 
 	// get item for edit
+	let page;
 	{
-		const targetPage = page;
+		const targetPage = searchPage;
 		await scrollIntoViewIfNeeded([
 			'div.searchresults li:nth-of-type(1) a'
 		], targetPage, timeout);
@@ -54,12 +55,16 @@ import {
 		// 	},
 		// });
 		// go directly to edit
-		// TODO: open this in new tab instead (so we can close tabs in a loop)
-		let url = await page.evaluate(() => {
-			return document.querySelector('div.searchresults li:nth-of-type(1) a').href;
+		let url = await targetPage.evaluate(() => {
+			const li = document.querySelector('div.searchresults li:nth-of-type(1)');
+			const href = li.querySelector('a').href;
+			li.remove(); // done => remove
+			return href;
 		});
 		url += '?action=edit';
-		await targetPage.goto(url);
+		// open new tab
+		page = await browser.newPage();
+		await page.goto(url);
 	}
 
 	// run WP:SK
@@ -121,7 +126,8 @@ import {
 		});
 	}
 
-	// await browser.close();
+	// close tab
+	await page.close();
 
 })().catch(err => {
 	console.error(err);
