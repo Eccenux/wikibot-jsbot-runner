@@ -123,11 +123,13 @@ export default class WikiBot {
 			timeout,
 			visible: true
 		});
+		let nav = targetPage.waitForNavigation(); // init wait
 		await element.click({
 			offset: {
 				x: 22,
 				y: 9.21875,
 			},
 		});
+		await nav; // wait for form submit
 	}
 }
