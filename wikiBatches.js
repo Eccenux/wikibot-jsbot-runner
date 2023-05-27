@@ -83,7 +83,7 @@ async runBatches(batches, batchSize) {
 	let failedTotal = [];
 	console.log(`Edit ${total} in ${batches} batches.`);
 	for (let batchIndex = batches - 1, batchNo = 1; batchIndex >= 0; batchIndex--, batchNo++) {
-		let failedPages = await runBatch(browser, batchSize, batchIndex);
+		let failedPages = await this.runBatch(browser, batchSize, batchIndex);
 		failedTotal = failedTotal.concat(failedPages);
 		// progress info
 		let done = batchSize * batchNo;
