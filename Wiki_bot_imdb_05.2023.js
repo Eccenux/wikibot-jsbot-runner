@@ -26,13 +26,21 @@ import {
 	await bot.openSearch(searchPage);
 
 	// edit page
-	let page = await bot.openForEdit(searchPage, browser);
-	await bot.initViewport(page);
-	await bot.runSk(page);
-	await bot.saveEdit(page);
+	async function editPage() {
+		let page = await bot.openForEdit(searchPage, browser);
+		await bot.initViewport(page);
+		await bot.runSk(page);
+		await bot.saveEdit(page);
 
-	// close tab
-	await page.close();
+		// close tab
+		await page.close();
+	}
+
+	// loop-edit
+	let max = 2;
+	for (let index = 0; index < max; index++) {
+		await editPage();
+	}
 
 })().catch(err => {
 	console.error(err);
