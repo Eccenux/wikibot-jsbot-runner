@@ -60,8 +60,8 @@ async function runBatch(browser, batchSize, batchIndex) {
 		browserWSEndpoint: wsUrl,
 	});
 	
-	const batches = 2;
-	const batchSize = 3;
+	const batches = 21;
+	const batchSize = 50;
 	for (let batchIndex = batches - 1; batchIndex >= 0; batchIndex--) {
 		await runBatch(browser, batchSize, batchIndex);
 	}
