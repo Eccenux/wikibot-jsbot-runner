@@ -39,7 +39,7 @@ async function runBatch(browser, batchSize, batchIndex) {
 			ok = false;
 			failed = {title, url};
 			console.warn(`edit failed, skipping (${title})\n${url}`);
-			console.warn(err);
+			// console.warn(err);
 		});
 		if (ok) {
 			console.log('done:', title);
@@ -70,7 +70,7 @@ async function runBatch(browser, batchSize, batchIndex) {
 		browserWSEndpoint: wsUrl,
 	});
 	
-	const batches = 8;
+	const batches = 1;
 	const batchSize = 10;
 	let total = batchSize * batches;
 	let failedTotal = [];
