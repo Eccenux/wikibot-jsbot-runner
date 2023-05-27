@@ -54,13 +54,6 @@ export default class WikiBot {
 			timeout,
 			visible: true
 		});
-		// click that navigates breaks puppeteer :-/
-		// await element.click({
-		// 	offset: {
-		// 		x: 19.03125,
-		// 		y: 8.1875,
-		// 	},
-		// });
 		// go directly to edit
 		let url = await targetPage.evaluate(() => {
 			const li = document.querySelector('div.searchresults li:nth-of-type(1)');
@@ -68,7 +61,7 @@ export default class WikiBot {
 			li.remove(); // done => remove
 			return href;
 		});
-		url += '?action=edit';
+		url += '?action=edit&js_bot_ed=1';	// jsbot auto-submit param
 		// open new tab
 		let page = await browser.newPage();
 		await page.goto(url);
@@ -88,21 +81,21 @@ export default class WikiBot {
 			]
 		}, targetPage, timeout);
 
-		await scrollIntoViewIfNeeded([
-			'#wp_sk_img_btn'
-		], targetPage, timeout);
-		const element = await waitForSelectors([
-			'#wp_sk_img_btn'
-		], targetPage, {
-			timeout,
-			visible: true
-		});
-		await element.click({
-			offset: {
-				x: 10,
-				y: 11.59375,
-			},
-		});
+		// await scrollIntoViewIfNeeded([
+		// 	'#wp_sk_img_btn'
+		// ], targetPage, timeout);
+		// const element = await waitForSelectors([
+		// 	'#wp_sk_img_btn'
+		// ], targetPage, {
+		// 	timeout,
+		// 	visible: true
+		// });
+		// await element.click({
+		// 	offset: {
+		// 		x: 10,
+		// 		y: 11.59375,
+		// 	},
+		// });
 
 		// check if summary was added
 		await targetPage.waitForFunction(`wpSummary.value.search('${this.summary}') > 0`, {
