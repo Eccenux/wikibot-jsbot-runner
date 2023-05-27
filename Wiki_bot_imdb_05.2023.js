@@ -31,11 +31,13 @@ async function runBatch(browser, batchSize, batchIndex) {
 
 		// Catch edit errors and skip them (e.g. when summary is empty we don't really care).
 		let ok = true;
+		let failed = false;
 		await (async () => {
 			await bot.runSk(page);
 			await bot.saveEdit(page);
 		})().catch(err => {
 			ok = false;
+			failed = {title, url};
 			console.warn(`edit failed, skipping (${title})\n${url}`);
 			console.warn(err);
 		});
@@ -45,13 +47,21 @@ async function runBatch(browser, batchSize, batchIndex) {
 
 		// close tab
 		await page.close();
+
+		return failed;
 	}
 
 	// loop-edit
 	let max = batchSize; // whole page
+	let failedPages = [];
 	for (let index = 0; index < max; index++) {
-		await editPage();
+		let failed = await editPage();
+		if (failed) {
+			failedPages.push(failed);
+		}
 	}
+
+	return failedPages;
 }
 
 (async () => {
@@ -62,12 +72,19 @@ async function runBatch(browser, batchSize, batchIndex) {
 	
 	const batches = 21;
 	const batchSize = 50;
+	let total = batchSize * batches;
+	let failedTotal = [];
+	console.log(`Edit ${total} in ${batches} batches.`);
 	for (let batchIndex = batches - 1; batchIndex >= 0; batchIndex--) {
-		await runBatch(browser, batchSize, batchIndex);
+		let failedPages = await runBatch(browser, batchSize, batchIndex);
+		failedTotal = failedTotal.concat(failedPages);
 	}
 	
 	// done
-	console.log('done');
+	if (failedTotal.length) {
+		console.warn('failed:\n', failedTotal.map(v=>v.url).join('\n'));
+	}
+	console.log(`done (${total-failedTotal.length}/${total})`);
 	process.exit(0);
 
 })().catch(err => {
