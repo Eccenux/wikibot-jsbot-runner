@@ -70,14 +70,17 @@ async function runBatch(browser, batchSize, batchIndex) {
 		browserWSEndpoint: wsUrl,
 	});
 	
-	const batches = 21;
-	const batchSize = 50;
+	const batches = 8;
+	const batchSize = 10;
 	let total = batchSize * batches;
 	let failedTotal = [];
 	console.log(`Edit ${total} in ${batches} batches.`);
-	for (let batchIndex = batches - 1; batchIndex >= 0; batchIndex--) {
+	for (let batchIndex = batches - 1, batchNo = 1; batchIndex >= 0; batchIndex--, batchNo++) {
 		let failedPages = await runBatch(browser, batchSize, batchIndex);
 		failedTotal = failedTotal.concat(failedPages);
+		// progress info
+		let done = batchSize * batchNo;
+		console.log(`done batch: ${batchSize-failedPages.length}/${batchSize}; done total: ${done-failedTotal.length}/${done}/${total};`);
 	}
 	
 	// done
