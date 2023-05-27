@@ -28,16 +28,30 @@ import {
 	// edit page
 	async function editPage() {
 		let page = await bot.openForEdit(searchPage, browser);
+		let title = await page.title();
+		let url = await page.url();
 		await bot.initViewport(page);
-		await bot.runSk(page);
-		await bot.saveEdit(page);
+		
+		// Catch edit errors and skip them (e.g. when summary is empty we don't really care).
+		let ok = true;
+		await (async () => {
+			await bot.runSk(page);
+			await bot.saveEdit(page);
+		})().catch(err => {
+			ok = false;
+			console.warn(`edit failed, skipping (${title})\n${url}`);
+			console.warn(err);
+		});
+		if (ok) {
+			console.log('done:', title);
+		}
 
 		// close tab
 		await page.close();
 	}
 
 	// loop-edit
-	let max = 2;
+	let max = 20; // whole page
 	for (let index = 0; index < max; index++) {
 		await editPage();
 	}
