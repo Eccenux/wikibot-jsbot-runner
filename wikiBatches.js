@@ -17,10 +17,45 @@ export default class WikiBatches {
 		this.summary = expectedSummary;
 		/** Disable save. */
 		this.mock = false;
-		/** Wait before close [ms]. */
+		/** Wait before close [ms] (or you can set a breakpoint to check stuff). */
 		this.mockSleep = 0;
 	}
 
+	/**
+	 * Prepare search URL.
+	 * @param {Array} queryList List of strings or regexp
+	 * 	(string is used as-is).
+	 * 	(regexp will be transformed into `insource:` regexp string).
+	 * @param {Number} limit Limit as used in the `searchUrlTpl`.
+	 * @param {Number} offset Offset as used in the `searchUrlTpl`.
+	 * @returns Full search URL string.
+	 */
+	searchUrl(queryList, limit, offset) {
+		const baseUrl = `https://pl.wikipedia.org/w/index.php`
+		const params = `
+			&sort=last_edit_asc
+			&title=Specjalna:Szukaj
+			&profile=advanced
+			&fulltext=1
+			&ns0=1
+			&ns6=1
+			&ns8=1
+			&ns10=1
+			&ns14=1
+			&ns100=1
+		`.replace(/\s+/g, '');
+		const page = `&limit=${limit}&offset=${offset}`;
+		let query = queryList.map(q=>{
+			if (typeof q === 'string') {
+				return q;
+			}
+			if (q instanceof RegExp) {
+				return 'insource:' + q.toString();
+			}
+		}).join(' ');
+		return baseUrl + '?search=' + encodeURIComponent(query) + params + page;
+	}
+	
 	// edit page
 	async editPage(searchPage, browser, bot) {
 		let page = await bot.openForEdit(searchPage, browser);
