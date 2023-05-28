@@ -7,10 +7,51 @@ import {
 	wsUrl,
 } from './chrome.config.js'
 
+function sleep(sleepMs) {
+	return new Promise((resolve)=>{setTimeout(()=>resolve(), sleepMs)});
+}
+
 export default class WikiBatches {
 	constructor(searchUrlTpl, expectedSummary) {
 		this.searchUrlTpl = searchUrlTpl;
 		this.summary = expectedSummary;
+		/** Disable save. */
+		this.mock = false;
+		/** Wait before close [ms]. */
+		this.mockSleep = 0;
+	}
+
+	// edit page
+	async editPage(searchPage, browser, bot) {
+		let page = await bot.openForEdit(searchPage, browser);
+		let title = await page.title();
+		let url = await page.url();
+		await bot.initViewport(page);
+
+		// Catch edit errors and skip them (e.g. when summary is empty we don't really care).
+		let ok = true;
+		let failed = false;
+		await (async () => {
+			await bot.runSk(page);
+			if (!this.mock) {
+				await bot.saveEdit(page);
+			} else {
+				await sleep(this.mockSleep);
+			}
+		})().catch(err => {
+			ok = false;
+			failed = {title, url};
+			console.warn(`edit failed, skipping (${title})\n${url}`);
+			// console.warn(err);
+		});
+		if (ok) {
+			console.log('done:', title);
+		}
+
+		// close tab
+		await page.close();
+
+		return failed;
 	}
 
 /** Run single page. */
@@ -28,40 +69,11 @@ async runBatch(browser, batchSize, batchIndex) {
 	// search
 	await bot.openSearch(searchPage);
 
-	// edit page
-	async function editPage() {
-		let page = await bot.openForEdit(searchPage, browser);
-		let title = await page.title();
-		let url = await page.url();
-		await bot.initViewport(page);
-
-		// Catch edit errors and skip them (e.g. when summary is empty we don't really care).
-		let ok = true;
-		let failed = false;
-		await (async () => {
-			await bot.runSk(page);
-			await bot.saveEdit(page);
-		})().catch(err => {
-			ok = false;
-			failed = {title, url};
-			console.warn(`edit failed, skipping (${title})\n${url}`);
-			// console.warn(err);
-		});
-		if (ok) {
-			console.log('done:', title);
-		}
-
-		// close tab
-		await page.close();
-
-		return failed;
-	}
-
 	// loop-edit
 	let max = batchSize; // whole page
 	let failedPages = [];
 	for (let index = 0; index < max; index++) {
-		let failed = await editPage();
+		let failed = await this.editPage(searchPage, browser, bot);
 		if (failed) {
 			failedPages.push(failed);
 		}
