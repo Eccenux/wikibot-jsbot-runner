@@ -61,7 +61,7 @@ export default class WikiBot {
 			li.remove(); // done => remove
 			return href;
 		});
-		url += '?action=edit&js_bot_ed=1';	// jsbot auto-submit param
+		url += '?action=edit&useskin=monobook&js_bot_ed=1';	// jsbot auto-submit param
 		// open new tab
 		let page = await browser.newPage();
 		await page.goto(url);

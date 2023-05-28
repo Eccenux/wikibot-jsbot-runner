@@ -1,5 +1,5 @@
 /* global document, console, process */
-import puppeteer from 'puppeteer'; // v13.0.0 or later
+import puppeteer, { Browser, Page } from 'puppeteer'; // v13.0.0 or later
 
 import WikiBot from './wikiBot.js';
 
@@ -43,6 +43,7 @@ export default class WikiBatches {
 			&ns10=1
 			&ns14=1
 			&ns100=1
+			&useskin=monobook
 		`.replace(/\s+/g, '');
 		const page = `&limit=${limit}&offset=${offset}`;
 		let query = queryList.map(q=>{
@@ -56,7 +57,13 @@ export default class WikiBatches {
 		return baseUrl + '?search=' + encodeURIComponent(query) + params + page;
 	}
 	
-	// edit page
+	/**
+	 * Run edit operations on a 1st search item.
+	 * @param {Page} searchPage 
+	 * @param {Browser} browser 
+	 * @param {WikiBot} bot 
+	 * @returns 
+	 */
 	async editPage(searchPage, browser, bot) {
 		let page = await bot.openForEdit(searchPage, browser);
 		let title = await page.title();
