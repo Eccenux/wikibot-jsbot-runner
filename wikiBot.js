@@ -58,7 +58,12 @@ export default class WikiBot {
 			li.remove(); // done => remove
 			return href;
 		});
-		url += '?action=edit&useskin=monobook&js_bot_ed=1';	// jsbot auto-submit param
+		// NuxJsBot params
+		const botParam = 'js_bot_ed=1';
+		const skipDiffParam = 'js_bot_nd=1';
+		url += '?action=edit&useskin=monobook';	
+		url += '&' + botParam;
+		url += '&' + skipDiffParam;
 		// open new tab
 		let page = await browser.newPage();
 		await page.goto(url);
