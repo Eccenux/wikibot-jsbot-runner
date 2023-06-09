@@ -90,6 +90,8 @@ export default class WikiBatches {
 			console.log('done:', title);
 		}
 
+		// free memory? https://github.com/puppeteer/puppeteer/issues/1490
+		await page.goto('about:blank');	
 		// close tab
 		await page.close();
 
