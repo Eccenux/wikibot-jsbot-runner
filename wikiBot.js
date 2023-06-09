@@ -43,11 +43,8 @@ export default class WikiBot {
 	 * Edit 1st item.
 	 */
 	async openForEdit(targetPage, browser) {
-		const timeout = 500;
+		const timeout = 2000;
 
-		await scrollIntoViewIfNeeded([
-			'div.searchresults li:nth-of-type(1) a'
-		], targetPage, timeout);
 		await waitForSelectors([
 			'div.searchresults li:nth-of-type(1) a'
 		], targetPage, {
@@ -75,7 +72,7 @@ export default class WikiBot {
 
 		await waitForElement({
 			type: 'waitForElement',
-			timeout: 2000,
+			timeout: 4000,
 			selectors: [
 				'#wp_sk_img_btn'
 			]
