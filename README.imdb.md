@@ -41,7 +41,7 @@ Do tytułów powinno być inne summary... Może do nagród też inne.
 
 ✅ jsbot: Dodanie `#jsbot-sk-done` z `data-changes="${changes}"`.
 
-Oczekiwanie na `#jsbot-sk-done` i ew. spr. dataset.changes (0/1).
+✅ Oczekiwanie na `#jsbot-sk-done` i ew. spr. dataset.changes (0/1).
 
 Wywołanie skipDiff w runnerze.
 

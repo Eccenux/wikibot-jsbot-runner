@@ -71,15 +71,22 @@ export default class WikiBatches {
 		let ok = true;
 		let failed = false;
 		await (async () => {
-			await bot.runSk(page);
+			let summaryFound = await bot.runSk(page);
+			if (!summaryFound) {
+				ok = false;
+				failed = {title, url, error:false};
+				console.info(`empty edit, skipping (${title})\n${url}`);
+			}
 			if (!this.mock) {
-				await bot.saveEdit(page);
+				if (summaryFound) {
+					await bot.saveEdit(page);
+				}
 			} else {
 				await sleep(this.mockSleep);
 			}
 		})().catch(err => {
 			ok = false;
-			failed = {title, url};
+			failed = {title, url, error:true};
 			console.warn(`edit failed, skipping (${title})\n${url}`);
 			// console.warn(err);
 		});
@@ -143,12 +150,14 @@ async runBatches(batches, batchSize) {
 		failedTotal = failedTotal.concat(failedPages);
 		// progress info
 		let done = batchSize * batchNo;
-		console.log(`done batch: ${batchSize-failedPages.length}/${batchSize}; done total: ${done-failedTotal.length}/${done}/${total};`);
+		let failRate = Math.round(100 * (done-failedTotal.length) / done);
+		console.log(`done batch: ${batchSize-failedPages.length}/${batchSize}; total fail rate: ${failRate}%; total progress: ${done}/${total};`);
 	}
 	
 	// done
 	if (failedTotal.length) {
-		console.warn('failed:\n', failedTotal.map(v=>v.url).join('\n'));
+		console.info('failed with info:\n', failedTotal.filter(v=>!v.error).map(v=>v.url).join('\n'));
+		console.warn('failed with error:\n', failedTotal.filter(v=>v.error).map(v=>v.url).join('\n'));
 	}
 	console.log(`done (${total-failedTotal.length}/${total})`);
 	process.exit(0);

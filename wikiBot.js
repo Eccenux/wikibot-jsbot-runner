@@ -94,10 +94,20 @@ export default class WikiBot {
 		// 	},
 		// });
 
+		await waitForElement({
+			type: 'waitForElement',
+			timeout: 4000,
+			selectors: [
+				'#jsbot-sk-done'
+			]
+		}, targetPage, timeout);
+
 		// check if summary was added
-		await targetPage.waitForFunction(`wpSummary.value.search('${this.summary}') > 0`, {
-			timeout: 3000
+		let summaryFound = await targetPage.evaluate(() => {
+			return wpSummary.value.search('${this.summary}') > 0;
 		});
+
+		return summaryFound;
 	}
 
 	/** Save. */
