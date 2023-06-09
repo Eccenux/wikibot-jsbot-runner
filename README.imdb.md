@@ -17,12 +17,6 @@ Nagrody – osoby:
 - https://www.imdb.com/name/nm0000040/awards
 - {{IMDb|osoba nagrody|0000040|Stanley Kubrick}}
 
-Wyszukiwanie nagród:
-```
-insource:'imdb.com/name' insource:/\[https?:\/\/www\.imdb\.com\/name\/nm[0-9]+\/awards/
-```
--> ~70
-
 ## Tytułowe (filmy)
 
 Wyszukiwanie?
