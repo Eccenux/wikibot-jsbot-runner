@@ -35,6 +35,11 @@ Do tytułów powinno być inne summary... Może do nagród też inne.
 
 ✅ Zamykanie strony wyszukiwania.
 
+❌Odcinki serialu:
+- https://www.imdb.com/title/tt0389564/episodes
+- {{IMDb|lista|0389564|4400}}
+Nie, jest z sezonami: https://www.imdb.com/title/tt0084972/episodes?season=1
+
 ✅ jsbot: Ścieżka dźwiękowa i filmy (tytuł).
 
 ✅ jsbot: skipDiff
@@ -43,14 +48,9 @@ Do tytułów powinno być inne summary... Może do nagród też inne.
 
 ✅ Oczekiwanie na `#jsbot-sk-done` i ew. spr. dataset.changes (0/1).
 
-Wywołanie skipDiff w runnerze.
+✅ Wywołanie skipDiff w runnerze.
 
-Wykrywanie końca listy (wszystkie elementy ukryte).
-
-❌Odcinki serialu:
-- https://www.imdb.com/title/tt0389564/episodes
-- {{IMDb|lista|0389564|4400}}
-Nie, jest z sezonami: https://www.imdb.com/title/tt0084972/episodes?season=1
+✅ Wykrywanie końca listy (wszystkie elementy ukryte).
 
 Ścieżka dźwiękowa:
 - https://www.imdb.com/title/tt0094582/soundtrack

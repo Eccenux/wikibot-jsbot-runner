@@ -63,6 +63,10 @@ export default class WikiBatches {
 	 */
 	async editPage(searchPage, browser, bot) {
 		let page = await bot.openForEdit(searchPage, browser);
+		if (!page) {
+			console.info(`nothing to edit? ignore`);
+			return false;
+		}
 		let title = await page.title();
 		let url = await page.url();
 		await bot.initViewport(page);
@@ -116,10 +120,10 @@ async runBatch(browser, batchSize, batchIndex) {
 	await bot.initViewport(searchPage);
 
 	// search
-	await bot.openSearch(searchPage);
+	let itemCount = await bot.openSearch(searchPage);
 
 	// loop-edit
-	let max = batchSize; // whole page
+	let max = itemCount; // whole page
 	let failedPages = [];
 	for (let index = 0; index < max; index++) {
 		let failed = await this.editPage(searchPage, browser, bot);
@@ -128,7 +132,10 @@ async runBatch(browser, batchSize, batchIndex) {
 		}
 	}
 
-	searchPage.close();
+	// close all but one
+	if (batchIndex) {
+		searchPage.close();
+	}
 
 	return failedPages;
 }

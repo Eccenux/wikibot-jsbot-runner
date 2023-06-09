@@ -37,27 +37,41 @@ export default class WikiBot {
 	 */
 	async openSearch(targetPage) {
 		await targetPage.goto(this.searchUrl);
+
+		// div.searchresults should also be on empty search page
+		await waitForSelectors([
+			'div.searchresults'
+		], targetPage, {
+			timeout: 15000,
+			visible: true
+		});
+
+		// check number of items
+		let itemCount = await targetPage.evaluate(() => {
+			const li = document.querySelectorAll('div.searchresults li');
+			return li.length;
+		});
+
+		return itemCount;
 	}
 
 	/**
 	 * Edit 1st item.
 	 */
 	async openForEdit(targetPage, browser) {
-		const timeout = 2000;
-
-		await waitForSelectors([
-			'div.searchresults li:nth-of-type(1) a'
-		], targetPage, {
-			timeout,
-			visible: true
-		});
 		// go directly to edit
 		let url = await targetPage.evaluate(() => {
 			const li = document.querySelector('div.searchresults li:nth-of-type(1)');
+			if (!li) {
+				return false;
+			}
 			const href = li.querySelector('a').href;
 			li.remove(); // done => remove
 			return href;
 		});
+		if (!url) {
+			return false;
+		}
 		// NuxJsBot params
 		const botParam = 'js_bot_ed=1';
 		const skipDiffParam = 'js_bot_nd=1';
