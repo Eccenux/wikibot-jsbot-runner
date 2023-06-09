@@ -38,9 +38,6 @@ export default class WikiBatches {
 			&profile=advanced
 			&fulltext=1
 			&ns0=1
-			&ns6=1
-			&ns8=1
-			&ns10=1
 			&ns14=1
 			&ns100=1
 			&useskin=monobook
@@ -90,8 +87,9 @@ export default class WikiBatches {
 			console.log('done:', title);
 		}
 
+		// unable to close
 		// free memory? https://github.com/puppeteer/puppeteer/issues/1490
-		await page.goto('about:blank');	
+		// await page.goto('about:blank');	
 		// close tab
 		await page.close();
 
@@ -122,6 +120,8 @@ async runBatch(browser, batchSize, batchIndex) {
 			failedPages.push(failed);
 		}
 	}
+
+	searchPage.close();
 
 	return failedPages;
 }
