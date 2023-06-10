@@ -1,6 +1,6 @@
 
 /**
- * Aggresive resource caching.
+ * Aggressive resource caching.
  * 
  * Multiple pages should be able to share this cache.
  */
@@ -40,11 +40,22 @@ export default class PageCache {
 		// serve from cache
 		page.on('request', async (request) => {
 			const url = request.url();
-			// if (cache[url] && cache[url].expires > Date.now()) {
-			if (cache[url]) {
-				this.stats.fromCache++;
-				await request.respond(cache[url]);
-				return;
+			try {
+				if (url in cache) {
+					const cached = cache[url];
+					const method = request.method();
+					// if (cached.expires > Date.now()) {
+					if (method === 'GET') {
+						this.stats.fromCache++;
+						await request.respond(cached);
+						return;
+					}
+					else {
+						console.warn('[PageCache]', 'skipped', JSON.stringify({method, url}));
+					}
+				}
+			} catch (error) {
+				console.warn('[PageCache]', 'serving cache failed', url, '\n', error);
 			}
 			this.stats.direct++;
 			request.continue();
@@ -67,10 +78,21 @@ export default class PageCache {
 					return;
 				}
 
+				// cleanup headers
+				delete headers['nel'];
+				delete headers['report-to'];
+				delete headers['age'];
+				delete headers['cache-control'];
+				delete headers['set-cookie'];	// this brakes puppeteer
+				delete headers['server-timing'];
+				delete headers['x-cache'];
+				delete headers['x-cache-status'];
+
+				// save
 				this.stats.saved++;
 				cache[url] = {
 					status: response.status(),
-					headers: response.headers(),
+					headers,
 					body: buffer,
 					expires: Date.now() + (this.maxAge * 1000),
 				};
@@ -104,8 +126,8 @@ export default class PageCache {
 			return true;
 		}
 
-		console.log(JSON.stringify(headers, null, '\t'));
-		console.log(url);
+		// console.log(JSON.stringify(headers, null, '\t'));
+		// console.log(url);
 
 		return null;
 	}

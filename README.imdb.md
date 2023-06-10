@@ -62,6 +62,6 @@ Nie, jest z sezonami: https://www.imdb.com/title/tt0084972/episodes?season=1
 
 ✅ PWA-like caching.
 
-More agressive JS caching.
+✅ More aggressive JS caching.
 
 Filmy c.d.
