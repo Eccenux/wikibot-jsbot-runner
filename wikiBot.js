@@ -92,7 +92,8 @@ export default class WikiBot {
 	}
 
 	/**
-	 * Edit 1st item.
+	 * Edit 1st item in a new tab.
+	 * @deprecated Better to read URL separately (and reuse tabs).
 	 */
 	async openForEdit(searchPage, browser) {
 		let url = await this.readEditUrl(searchPage);

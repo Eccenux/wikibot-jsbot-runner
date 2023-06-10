@@ -112,11 +112,17 @@ export default class WikiBatches {
 			console.log('done:', title);
 		}
 
+		// unable to close
+		// free memory? https://github.com/puppeteer/puppeteer/issues/1490
+		// await page.goto('about:blank');	
+
 		return failed;
 	}
-	
+
 	/**
 	 * Run edit operations on a 1st search item.
+	 * 
+	 * @deprecated This is opening and closing tabs; better to reuse instead.
 	 * @param {Page} searchPage 
 	 * @param {Browser} browser 
 	 * @param {WikiBot} bot 
@@ -133,13 +139,29 @@ export default class WikiBatches {
 
 		const failed = await this.runSk(editPage, bot);
 
-		// unable to close
-		// free memory? https://github.com/puppeteer/puppeteer/issues/1490
-		// await page.goto('about:blank');	
 		// close tab
 		await page.close();
 
 		return failed;
+	}
+
+	/**
+	 * Read all urls on a page.
+	 * @param {Page} searchPage 
+	 * @param {WikiBot} bot 
+	 * @returns {Array}
+	 */
+	async readEditUrls(searchPage, bot, max) {
+		let urls = [];
+		for (let index = 0; index < max; index++) {
+			let url = await bot.readEditUrl(searchPage);
+			if (!url) {
+				console.info(`nothing to edit? ignore`);
+				break;
+			}
+			urls.push(url);
+		}
+		return urls;
 	}
 
 	/** Run single page. */
@@ -158,13 +180,19 @@ export default class WikiBatches {
 
 		// loop-edit
 		let max = itemCount; // whole page
+		let urls = await this.readEditUrls(searchPage, bot, max);
 		let failedPages = [];
-		for (let index = 0; index < max; index++) {
-			let failed = await this.editPage(searchPage, browser, bot);
+		const page = await bot.openTab(browser);
+		for (let index = 0; index < urls.length; index++) {
+			let url = urls[index];
+			await page.goto(url);
+			const editPage = new EditPage(page);
+			const failed = await this.runSk(editPage, bot);
 			if (failed) {
 				failedPages.push(failed);
 			}
 		}
+		await page.close();
 
 		// close all but one
 		if (batchIndex) {
