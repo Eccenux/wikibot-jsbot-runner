@@ -122,8 +122,14 @@ export default class WikiBot {
 		}, targetPage, timeout);
 
 		// check if summary was added
-		let summaryFound = await targetPage.evaluate(() => {
-			return wpSummary.value.search('${this.summary}') > 0;
+		let summaryFound = await targetPage.evaluate((expectedSummary) => {
+			let wpSummary = document.querySelector('#wpSummary');
+			return wpSummary.value.search(expectedSummary) > 0;
+		}, this.summary);	// pass to evaluate
+
+		// disable leave-page warning
+		await targetPage.evaluate(() => {
+			$(window).off('beforeunload');
 		});
 
 		return summaryFound;

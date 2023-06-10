@@ -17,11 +17,11 @@ const searchUrlTpl = function(limit, offset) {
 const expectedSummary = 'imdb';
 const batchBot = new WikiBatches(searchUrlTpl, expectedSummary);
 // mock
-batchBot.mock = true;
-batchBot.mockSleep = 2_000;
+// batchBot.mock = true;
+// batchBot.mockSleep = 2_000;
 
 (async () => {
-	const batches = 4;
+	const batches = 3;
 	const batchSize = 10;
 	await batchBot.runBatches(batches, batchSize);
 })().catch(err => {

@@ -157,14 +157,14 @@ async runBatches(batches, batchSize) {
 		failedTotal = failedTotal.concat(failedPages);
 		// progress info
 		let done = batchSize * batchNo;
-		let failRate = Math.round(100 * (done-failedTotal.length) / done);
+		let failRate = 100 - Math.round(100 * (done-failedTotal.length) / done);
 		console.log(`done batch: ${batchSize-failedPages.length}/${batchSize}; total fail rate: ${failRate}%; total progress: ${done}/${total};`);
 	}
 	
 	// done
 	if (failedTotal.length) {
-		console.info('failed with info:\n', failedTotal.filter(v=>!v.error).map(v=>v.url).join('\n'));
-		console.warn('failed with error:\n', failedTotal.filter(v=>v.error).map(v=>v.url).join('\n'));
+		console.info('failed with info:' , '\n' + failedTotal.filter(v=>!v.error).map(v=>v.url).join('\n'));
+		console.warn('failed with error:', '\n' + failedTotal.filter(v=>v.error).map(v=>v.url).join('\n'));
 	}
 	console.log(`done (${total-failedTotal.length}/${total})`);
 	process.exit(0);
