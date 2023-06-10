@@ -3,6 +3,7 @@ import puppeteer, { Browser, Page } from 'puppeteer'; // v13.0.0 or later
 
 import WikiBot from './wikiBot.js';
 import PageCache from './PageCache.js';
+import EditPage from './EditPage.js';
 
 import {
 	// wsUrl,
@@ -74,29 +75,15 @@ export default class WikiBatches {
 	}
 	
 	/**
-	 * Run edit operations on a 1st search item.
-	 * @param {Page} searchPage 
-	 * @param {Browser} browser 
+	 * Run SK on opened edit page.
+	 * @param {EditPage} editPage 
 	 * @param {WikiBot} bot 
 	 * @returns 
 	 */
-	async editPage(searchPage, browser, bot) {
-		let page = await bot.openForEdit(searchPage, browser);
-		if (!page) {
-			console.info(`nothing to edit? ignore`);
-			return false;
-		}
-		let url = await page.url();
-		let title = await page.evaluate(() => {
-			try {
-				return mw.config.get('wgTitle');
-			} catch (error) {
-				try {
-					return document.querySelector('h1').textContent;
-				} catch (error) {}
-			}
-			return document.title;
-		});
+	async runSk(editPage, bot) {
+		let url = await editPage.url();
+		let title = await editPage.title();
+		const page = editPage.page;
 
 		// Catch edit errors and skip them (e.g. when summary is empty we don't really care).
 		let ok = true;
@@ -124,6 +111,27 @@ export default class WikiBatches {
 		if (ok) {
 			console.log('done:', title);
 		}
+
+		return failed;
+	}
+	
+	/**
+	 * Run edit operations on a 1st search item.
+	 * @param {Page} searchPage 
+	 * @param {Browser} browser 
+	 * @param {WikiBot} bot 
+	 * @returns 
+	 */
+	async editPage(searchPage, browser, bot) {
+		let page = await bot.openForEdit(searchPage, browser);
+		if (!page) {
+			console.info(`nothing to edit? ignore`);
+			return false;
+		}
+
+		const editPage = new EditPage(page);
+
+		const failed = await this.runSk(editPage, bot);
 
 		// unable to close
 		// free memory? https://github.com/puppeteer/puppeteer/issues/1490

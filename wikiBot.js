@@ -20,6 +20,7 @@ export default class WikiBot {
 	async openTab(browser) {
 		const page = await browser.newPage();
 		await this.initViewport(page);
+		await this.cache.enable(page);
 		const timeout = 5000;
 		page.setDefaultTimeout(timeout);
 		return page;
@@ -40,7 +41,6 @@ export default class WikiBot {
 	 * Search.
 	 */
 	async openSearch(targetPage) {
-		await this.cache.enable(targetPage);
 		await targetPage.goto(this.searchUrl);
 
 		// div.searchresults should also be on empty search page
@@ -61,11 +61,16 @@ export default class WikiBot {
 	}
 
 	/**
-	 * Edit 1st item.
+	 * Read 1st url and remove it.
+	 * 
+	 * Multiple calls will give different results.
+	 * 
+	 * @param {Page} searchPage Search page.
+	 * @returns false when search results are empty (or there was a problem reading a link).
 	 */
-	async openForEdit(targetPage, browser) {
+	async readEditUrl(searchPage) {
 		// go directly to edit
-		let url = await targetPage.evaluate(() => {
+		let url = await searchPage.evaluate(() => {
 			const li = document.querySelector('div.searchresults li:nth-of-type(1)');
 			if (!li) {
 				return false;
@@ -83,12 +88,20 @@ export default class WikiBot {
 		url += '?action=edit&useskin=monobook';	
 		url += '&' + botParam;
 		url += '&' + skipDiffParam;
-		// open new tab
-		const page = await browser.newPage();
-		await this.initViewport(page);
-		await this.cache.enable(page);
-		await page.goto(url);
+		return url;
+	}
 
+	/**
+	 * Edit 1st item.
+	 */
+	async openForEdit(searchPage, browser) {
+		let url = await this.readEditUrl(searchPage);
+		if (!url) {
+			return false;
+		}
+		// open new tab
+		const page = await this.openTab(browser);
+		await page.goto(url);
 		return page;
 	}
 
