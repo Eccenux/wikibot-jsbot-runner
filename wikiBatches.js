@@ -27,6 +27,9 @@ export default class WikiBatches {
 		 * default: 0=main, 14=cat, 100=portal
 		 */
 		this.ns = [0, 14, 100];
+
+		/** Browser connection. */
+		this._browser = false;
 	}
 
 	/**
@@ -155,12 +158,23 @@ export default class WikiBatches {
 		return failedPages;
 	}
 
-	/** Run all. */
-	async runBatches(batches, batchSize) {
+	/** Init browser connection. */
+	async init() {
+		if (this._browser) {
+			return this._browser;
+		}
+
 		// connect to current (open) Chrome window
 		const browser = await puppeteer.connect({
 			browserWSEndpoint: wsUrl,
 		});
+
+		return browser;
+	}
+	/** Run all. */
+	async runBatches(batches, batchSize) {
+		// connect to current (open) Chrome window
+		const browser = await this.init();
 		
 		// const batches = 1;
 		// const batchSize = 10;
@@ -194,4 +208,38 @@ export default class WikiBatches {
 		process.exit(0);
 	}
 
+	/** check single search page. */
+	async checkBatch(searchUrlTpl, keep) {
+		// connect to current (open) Chrome window
+		const browser = await this.init();
+
+		const offset = 0;
+		const batchSize = 2;
+		const searchUrl = searchUrlTpl(batchSize, offset);
+		// console.log('checkBatch:', {searchUrl});
+		const expectedSummary = '';
+		const bot = new WikiBot(searchUrl, expectedSummary, this.cache);
+
+		// new tab for search page
+		const searchPage = await bot.openTab(browser);
+		await bot.initViewport(searchPage);
+
+		// search
+		await bot.openSearch(searchPage);
+
+		// check data
+		let totalCount = await searchPage.evaluate(() => {
+			const result = document.querySelector('.results-info');
+			const total = result?.dataset?.mwNumResultsTotal;
+			console.log({result, total});
+			return (typeof total === 'string') ? parseInt(total, 10) : 0;
+		});
+
+		// cleanup
+		if (!keep) {
+			searchPage.close();
+		}
+
+		return {totalCount, searchUrl};
+	}
 }

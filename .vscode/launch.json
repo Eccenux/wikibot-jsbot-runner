@@ -7,7 +7,16 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Launch Program",
+			"name": "Run subcats",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"program": "${workspaceFolder}\\Wiki_bot_subcats_06.2023.js"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Run imdb",
 			"skipFiles": [
 				"<node_internals>/**"
 			],
