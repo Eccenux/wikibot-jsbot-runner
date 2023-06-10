@@ -65,7 +65,7 @@ export default class WikiBot {
 			if (!li) {
 				return false;
 			}
-			const href = li.querySelector('a').href;
+			const href = li.querySelector('.mw-search-result-heading a').href;
 			li.remove(); // done => remove
 			return href;
 		});
