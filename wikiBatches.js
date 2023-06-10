@@ -86,9 +86,17 @@ export default class WikiBatches {
 			console.info(`nothing to edit? ignore`);
 			return false;
 		}
-		let title = await page.title();
 		let url = await page.url();
-		await bot.initViewport(page);
+		let title = await page.evaluate(() => {
+			try {
+				return mw.config.get('wgTitle');
+			} catch (error) {
+				try {
+					return document.querySelector('h1').textContent;
+				} catch (error) {}
+			}
+			return document.title;
+		});
 
 		// Catch edit errors and skip them (e.g. when summary is empty we don't really care).
 		let ok = true;
@@ -136,7 +144,6 @@ export default class WikiBatches {
 
 		// new tab for search page
 		const searchPage = await bot.openTab(browser);
-		await bot.initViewport(searchPage);
 
 		// search
 		let itemCount = await bot.openSearch(searchPage);
@@ -240,7 +247,6 @@ export default class WikiBatches {
 
 		// new tab for search page
 		const searchPage = await bot.openTab(browser);
-		await bot.initViewport(searchPage);
 
 		// search
 		await bot.openSearch(searchPage);

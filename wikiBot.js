@@ -19,6 +19,7 @@ export default class WikiBot {
 	 */
 	async openTab(browser) {
 		const page = await browser.newPage();
+		await this.initViewport(page);
 		const timeout = 5000;
 		page.setDefaultTimeout(timeout);
 		return page;
@@ -83,7 +84,8 @@ export default class WikiBot {
 		url += '&' + botParam;
 		url += '&' + skipDiffParam;
 		// open new tab
-		let page = await browser.newPage();
+		const page = await browser.newPage();
+		await this.initViewport(page);
 		await this.cache.enable(page);
 		await page.goto(url);
 

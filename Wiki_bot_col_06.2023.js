@@ -12,7 +12,7 @@ const batchBot = new WikiBatches(searchUrlTpl, expectedSummary);
 // batchBot.mockSleep = 2_000;
 
 (async () => {
-	const batches = 48;
+	const batches = 12;
 	const batchSize = 20;
 	// const batches = 1;
 	// const batchSize = 3;
