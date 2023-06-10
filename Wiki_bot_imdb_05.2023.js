@@ -10,7 +10,9 @@ const searchUrlTpl = function(limit, offset) {
 	// title - awards
 	// const query = [ `insource:'imdb.com/title'`, `insource:'/awards'`, /\[https?:\/\/www\.imdb\.com\/title\/tt[0-9]+\/awards/ ];
 	// soundtrack
-	const query = [ `insource:'imdb.com/title'`, `insource:'/soundtrack'`, /\[https?:\/\/www\.imdb\.com\/title\/tt[0-9]+\/soundtrack/ ];
+	// const query = [ `insource:'imdb.com/title'`, `insource:'/soundtrack'`, /\[https?:\/\/www\.imdb\.com\/title\/tt[0-9]+\/soundtrack/ ];
+	// title
+	const query = [ `insource:'imdb.com/title'`, /\[https?:\/\/www\.imdb\.com\/title\/tt[0-9]+\/?[ ?]/ ];
 
 	return batchBot.searchUrl(query, limit, offset);
 }
@@ -21,8 +23,8 @@ const batchBot = new WikiBatches(searchUrlTpl, expectedSummary);
 // batchBot.mockSleep = 2_000;
 
 (async () => {
-	const batches = 3;
-	const batchSize = 10;
+	const batches = 5;
+	const batchSize = 45;
 	await batchBot.runBatches(batches, batchSize);
 })().catch(err => {
 	console.error(err);
