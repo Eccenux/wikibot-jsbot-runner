@@ -190,9 +190,13 @@ export default class WikiBatches {
 				let failedPages = await this.runBatch(browser, batchSize, batchIndex);
 				failedTotal = failedTotal.concat(failedPages);
 				batchSuccess = batchSize - failedPages.length;
-			} catch (error) {
+			} catch (err) {
 				// symbolic fail-page
-				let failedBatch = {title:`BATCH-${batchNo}`, url:`http://localhost/?batch=${batchNo}&error=${encodeURIComponent(err.name)}`, error:true};
+				let failedBatch = {
+					title: `BATCH-${batchNo}`,
+					url: `http://localhost/?batch=${batchNo}&error=${encodeURIComponent(err.name)}`,
+					error: true,
+				};
 				failedTotal.push(failedBatch);
 				console.warn(`failed batch no ${batchNo}`);
 				console.warn(err.name, err.message);
