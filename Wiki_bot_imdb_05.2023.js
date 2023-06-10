@@ -23,8 +23,8 @@ batchBot.mock = true;
 // batchBot.mockSleep = 2_000;
 
 (async () => {
-	const batches = 4;
-	const batchSize = 10;
+	const batches = 1;
+	const batchSize = 2;
 	await batchBot.runBatches(batches, batchSize);
 })().catch(err => {
 	console.error(err);

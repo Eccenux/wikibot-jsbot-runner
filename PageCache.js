@@ -53,9 +53,9 @@ export default class PageCache {
 		// save to cache
 		page.on('response', async (response) => {
 			const headers = response.headers();
-			const cacheControl = headers['cache-control'] || '';
-			if (cacheControl.search(/max-age=[1-9]/) >= 0) {
-				const url = response.url();
+			const url = response.url();
+			let cacheit = this.shouldCache(url, headers);
+			if (cacheit) {
 				if (url in cache) {
 					return;
 				}
@@ -76,5 +76,37 @@ export default class PageCache {
 				};
 			}
 		});
+	}
+
+	/** 
+	 * Check if we should cache the response.
+	 */
+	shouldCache(url, headers) {
+		const contentType = headers['content-type'] || '';
+		if (contentType.startsWith('text/html')) {
+			return false;
+		}
+		if (contentType.search(/^text\/(javascript|css)/i) >= 0) {
+			return true;
+		}
+
+		const cacheControl = headers['cache-control'] || '';
+		if (cacheControl.search(/max-age=[1-9]/) >= 0) {
+			return true;
+		}
+
+		// user scripts
+		if (url.search(/&ctype=text\/(javascript|css)/) >= 0) {
+			return true;
+		}
+		// MediaWiki modules
+		if (url.search(/load.+&modules/) >= 0) {
+			return true;
+		}
+
+		console.log(JSON.stringify(headers, null, '\t'));
+		console.log(url);
+
+		return null;
 	}
 }
