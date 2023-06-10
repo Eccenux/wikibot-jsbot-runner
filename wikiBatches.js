@@ -183,6 +183,27 @@ export default class WikiBatches {
 		let urls = await this.readEditUrls(searchPage, bot, max);
 		let failedPages = [];
 		const page = await bot.openTab(browser);
+		await this.runEdits(urls, page, failedPages, bot);
+		await page.close();
+
+		// close all but one
+		if (batchIndex) {
+			searchPage.close();
+		}
+
+		return failedPages;
+	}
+
+	/**
+	 * Run edits in single tab.
+	 * 
+	 * @param {Array} urls Edit urls.
+	 * @param {Page} page Opened tab.
+	 * @param {Array} failedPages Summary of pages.
+	 * @param {WikiBot} bot .
+	 * @private
+	 */
+	async runEdits(urls, page, failedPages, bot) {
 		for (let index = 0; index < urls.length; index++) {
 			let url = urls[index];
 			await page.goto(url);
@@ -192,14 +213,61 @@ export default class WikiBatches {
 				failedPages.push(failed);
 			}
 		}
-		await page.close();
+	}
 
-		// close all but one
-		if (batchIndex) {
-			searchPage.close();
+	/** @private Open many. */
+	async openTabs(urls, browser) {
+		let tabCount = 5;
+		if (tabCount > urls.length) {
+			tabCount = urls.length;
 		}
-
-		return failedPages;
+		const tabs = [];
+		for (let index = 0; index < tabCount; index++) {
+			const page = await bot.openTab(browser);
+			tabs.push(page);
+		}
+		return tabs;
+	}
+	/** @private Close many. */
+	async closeTabs(tabs) {
+		for (let index = 0; index < tabs.length; index++) {
+			const page = tabs[index];
+			await page.close();
+		}
+		return tabs;
+	}
+	/**
+	 * Run edit in many tabs.
+	 * 
+	 * Don't seem to be working as well as it might seem it should.
+	 * Chrome doesn't seem to like to work in paralel.
+	 * 
+	 * @param {Array} urls Edit urls.
+	 * @param {Array} tabs Opened tabs.
+	 * @param {Array} failedPages Summary of pages.
+	 * @param {WikiBot} bot .
+	 * @private
+	 */
+	async runEditInTabs(urls, tabs, failedPages, bot) {
+		// edit loop
+		for (let index = 0; index < urls.length;) {
+			// open urls
+			for (let t = 0; t < tabs.length && index < urls.length; t++) {
+				const page = tabs[t];
+				let url = urls[index];
+				await page.goto(url);
+				index++;
+			}
+			// run edit
+			for (let t = 0; t < tabs.length; t++) {
+				const page = tabs[t];
+				const editPage = new EditPage(page);
+				const failed = await this.runSk(editPage, bot);
+				if (failed) {
+					failedPages.push(failed);
+				}
+			}
+		}
 	}
 
 	/** Init browser connection. */

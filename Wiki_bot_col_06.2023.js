@@ -13,7 +13,7 @@ const batchBot = new WikiBatches(searchUrlTpl, expectedSummary);
 
 (async () => {
 	const batches = 2;
-	const batchSize = 10;
+	const batchSize = 4;
 	// const batches = 1;
 	// const batchSize = 3;
 	await batchBot.runBatches(batches, batchSize);
