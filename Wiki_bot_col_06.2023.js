@@ -1,7 +1,7 @@
 import WikiBatches from './wikiBatches.js';
 
 const searchUrlTpl = function(limit, offset) {
-	const query = [ `hastemplate: "col-begin"`, `hastemplate: "col-break"`, /\{\{col-(break|2)\}\}.{1,3}\*/ ];
+	const query = [ `hastemplate: "col-begin"`, `hastemplate: "col-2"`, /\{\{col-(break|2)\}\}.{1,3}\*/ ];
 
 	return batchBot.searchUrl(query, limit, offset);
 }
@@ -12,8 +12,8 @@ const batchBot = new WikiBatches(searchUrlTpl, expectedSummary);
 // batchBot.mockSleep = 2_000;
 
 (async () => {
-	const batches = 2;
-	const batchSize = 4;
+	const batches = 1;
+	const batchSize = 12;
 	// const batches = 1;
 	// const batchSize = 3;
 	await batchBot.runBatches(batches, batchSize);
