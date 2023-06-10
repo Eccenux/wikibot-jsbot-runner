@@ -2,6 +2,7 @@
 import puppeteer, { Browser, Page } from 'puppeteer'; // v13.0.0 or later
 
 import WikiBot from './wikiBot.js';
+import PageCache from './PageCache.js';
 
 import {
 	wsUrl,
@@ -15,6 +16,7 @@ export default class WikiBatches {
 	constructor(searchUrlTpl, expectedSummary) {
 		this.searchUrlTpl = searchUrlTpl;
 		this.summary = expectedSummary;
+		this.cache = new PageCache();
 		/** Disable save. */
 		this.mock = false;
 		/** Wait before close [ms] (or you can set a breakpoint to check stuff). */
@@ -113,7 +115,7 @@ async runBatch(browser, batchSize, batchIndex) {
 	console.log('runBatch: ', {batchIndex, batchSize, offset});
 	const searchUrl = this.searchUrlTpl(batchSize, offset);
 	const expectedSummary = this.summary;
-	const bot = new WikiBot(searchUrl, expectedSummary);
+	const bot = new WikiBot(searchUrl, expectedSummary, this.cache);
 
 	// new tab for search page
 	const searchPage = await bot.openTab(browser);
@@ -158,6 +160,7 @@ async runBatches(batches, batchSize) {
 		// progress info
 		let done = batchSize * batchNo;
 		let failRate = 100 - Math.round(100 * (done-failedTotal.length) / done);
+		this.cache.info();
 		console.log(`done batch: ${batchSize-failedPages.length}/${batchSize}; total fail rate: ${failRate}%; total progress: ${done}/${total};`);
 	}
 	
@@ -166,6 +169,7 @@ async runBatches(batches, batchSize) {
 		console.info('failed with info:' , '\n' + failedTotal.filter(v=>!v.error).map(v=>v.url).join('\n'));
 		console.warn('failed with error:', '\n' + failedTotal.filter(v=>v.error).map(v=>v.url).join('\n'));
 	}
+	this.cache.info();
 	console.log(`done (${total-failedTotal.length}/${total})`);
 	process.exit(0);
 }

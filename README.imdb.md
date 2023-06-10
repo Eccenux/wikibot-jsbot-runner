@@ -52,10 +52,16 @@ Nie, jest z sezonami: https://www.imdb.com/title/tt0084972/episodes?season=1
 
 ✅ Wykrywanie końca listy (wszystkie elementy ukryte).
 
-Ścieżka dźwiękowa:
+✅ Ścieżka dźwiękowa:
 - https://www.imdb.com/title/tt0094582/soundtrack
 - {{IMDb|soundtrack|0094582|serialu ''Cudowne lata''}}
 
-Filmy:
+✅ Filmy (base):
 - https://www.imdb.com/title/tt0172495/
 - {{IMDb|tytuł|0172495|Gladiator}}
+
+✅ PWA-like caching.
+
+More agressive JS caching.
+
+Filmy c.d.

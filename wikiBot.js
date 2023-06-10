@@ -4,10 +4,13 @@ import {
 	waitForElement,
 } from './chromeBase.js'
 
+import PageCache from './PageCache.js';
+
 export default class WikiBot {
-	constructor(searchUrl, expectedSummary) {
+	constructor(searchUrl, expectedSummary, globalCache) {
 		this.searchUrl = searchUrl;
 		this.summary = expectedSummary;
+		this.cache = globalCache ? globalCache : new PageCache();
 	}
 
 	/**
@@ -36,6 +39,7 @@ export default class WikiBot {
 	 * Search.
 	 */
 	async openSearch(targetPage) {
+		await this.cache.enable(targetPage);
 		await targetPage.goto(this.searchUrl);
 
 		// div.searchresults should also be on empty search page
@@ -80,6 +84,7 @@ export default class WikiBot {
 		url += '&' + skipDiffParam;
 		// open new tab
 		let page = await browser.newPage();
+		await this.cache.enable(page);
 		await page.goto(url);
 
 		return page;
