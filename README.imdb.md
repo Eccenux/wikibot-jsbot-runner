@@ -64,4 +64,4 @@ Nie, jest z sezonami: https://www.imdb.com/title/tt0084972/episodes?season=1
 
 ✅ More aggressive JS caching.
 
-Filmy c.d.
+✅ Filmy c.d.
