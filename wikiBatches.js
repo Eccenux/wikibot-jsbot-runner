@@ -21,6 +21,12 @@ export default class WikiBatches {
 		this.mock = false;
 		/** Wait before close [ms] (or you can set a breakpoint to check stuff). */
 		this.mockSleep = 0;
+		/** 
+		 * Namespaces to search.
+		 * https://en.wikipedia.org/wiki/Wikipedia:Namespace
+		 * default: 0=main, 14=cat, 100=portal
+		 */
+		this.ns = [0, 14, 100];
 	}
 
 	/**
@@ -33,18 +39,25 @@ export default class WikiBatches {
 	 * @returns Full search URL string.
 	 */
 	searchUrl(queryList, limit, offset) {
-		const baseUrl = `https://pl.wikipedia.org/w/index.php`
-		const params = `
+		const baseUrl = `https://pl.wikipedia.org/w/index.php`;
+
+		// common params
+		let params = `
 			&sort=last_edit_asc
 			&title=Specjalna:Szukaj
 			&profile=advanced
 			&fulltext=1
-			&ns0=1
-			&ns14=1
-			&ns100=1
 			&useskin=monobook
 		`.replace(/\s+/g, '');
+		// append NS
+		this.ns.forEach(no => {
+			params += `&ns${no}=1`;
+		});
+
+		// current page of search results
 		const page = `&limit=${limit}&offset=${offset}`;
+
+		// strings/re to main search parameter
 		let query = queryList.map(q=>{
 			if (typeof q === 'string') {
 				return q;
@@ -109,69 +122,76 @@ export default class WikiBatches {
 		return failed;
 	}
 
-/** Run single page. */
-async runBatch(browser, batchSize, batchIndex) {
-	const offset = batchIndex * batchSize;
-	console.log('runBatch: ', {batchIndex, batchSize, offset});
-	const searchUrl = this.searchUrlTpl(batchSize, offset);
-	const expectedSummary = this.summary;
-	const bot = new WikiBot(searchUrl, expectedSummary, this.cache);
+	/** Run single page. */
+	async runBatch(browser, batchSize, batchIndex) {
+		const offset = batchIndex * batchSize;
+		console.log('runBatch: ', {batchIndex, batchSize, offset});
+		const searchUrl = this.searchUrlTpl(batchSize, offset);
+		const expectedSummary = this.summary;
+		const bot = new WikiBot(searchUrl, expectedSummary, this.cache);
 
-	// new tab for search page
-	const searchPage = await bot.openTab(browser);
-	await bot.initViewport(searchPage);
+		// new tab for search page
+		const searchPage = await bot.openTab(browser);
+		await bot.initViewport(searchPage);
 
-	// search
-	let itemCount = await bot.openSearch(searchPage);
+		// search
+		let itemCount = await bot.openSearch(searchPage);
 
-	// loop-edit
-	let max = itemCount; // whole page
-	let failedPages = [];
-	for (let index = 0; index < max; index++) {
-		let failed = await this.editPage(searchPage, browser, bot);
-		if (failed) {
-			failedPages.push(failed);
+		// loop-edit
+		let max = itemCount; // whole page
+		let failedPages = [];
+		for (let index = 0; index < max; index++) {
+			let failed = await this.editPage(searchPage, browser, bot);
+			if (failed) {
+				failedPages.push(failed);
+			}
 		}
+
+		// close all but one
+		if (batchIndex) {
+			searchPage.close();
+		}
+
+		return failedPages;
 	}
 
-	// close all but one
-	if (batchIndex) {
-		searchPage.close();
-	}
-
-	return failedPages;
-}
-
-/** Run all. */
-async runBatches(batches, batchSize) {
-	// connect to current (open) Chrome window
-	const browser = await puppeteer.connect({
-		browserWSEndpoint: wsUrl,
-	});
-	
-	// const batches = 1;
-	// const batchSize = 10;
-	let total = batchSize * batches;
-	let failedTotal = [];
-	console.log(`Edit ${total} in ${batches} batches.`);
-	for (let batchIndex = batches - 1, batchNo = 1; batchIndex >= 0; batchIndex--, batchNo++) {
-		let failedPages = await this.runBatch(browser, batchSize, batchIndex);
-		failedTotal = failedTotal.concat(failedPages);
-		// progress info
-		let done = batchSize * batchNo;
-		let failRate = 100 - Math.round(100 * (done-failedTotal.length) / done);
+	/** Run all. */
+	async runBatches(batches, batchSize) {
+		// connect to current (open) Chrome window
+		const browser = await puppeteer.connect({
+			browserWSEndpoint: wsUrl,
+		});
+		
+		// const batches = 1;
+		// const batchSize = 10;
+		let total = batchSize * batches;
+		let failedTotal = [];
+		console.log(`Edit ${total} in ${batches} batches.`);
+		for (let batchIndex = batches - 1, batchNo = 1; batchIndex >= 0; batchIndex--, batchNo++) {
+			let failedPages = await this.runBatch(browser, batchSize, batchIndex);
+			failedTotal = failedTotal.concat(failedPages);
+			// progress info
+			let done = batchSize * batchNo;
+			let failRate = 100 - Math.round(100 * (done-failedTotal.length) / done);
+			this.cache.info();
+			console.log(`done batch: ${batchSize-failedPages.length}/${batchSize}; total fail rate: ${failRate}%; total progress: ${done}/${total};`);
+		}
+		
+		// done
+		if (failedTotal.length) {
+			var failInfo = failedTotal.filter(v=>!v.error);
+			var failError  = failedTotal.filter(v=>v.error);
+			if (failInfo.length) {
+				console.log(`[failures] failed with info [${failInfo.length}]:` , '\n' + failInfo.map(v=>v.url).join('\n'));
+			}
+			if (failError.length) {
+				console.warn(`[failures] failed with error [${failError.length}]:`, '\n' + failError.map(v=>v.url).join('\n'));
+			}
+			console.log(`[failures] stats: info: ${failInfo.length}; error: ${failError.length}`);
+		}
 		this.cache.info();
-		console.log(`done batch: ${batchSize-failedPages.length}/${batchSize}; total fail rate: ${failRate}%; total progress: ${done}/${total};`);
+		console.log(`done (${total-failedTotal.length}/${total})`);
+		process.exit(0);
 	}
-	
-	// done
-	if (failedTotal.length) {
-		console.info('failed with info:' , '\n' + failedTotal.filter(v=>!v.error).map(v=>v.url).join('\n'));
-		console.warn('failed with error:', '\n' + failedTotal.filter(v=>v.error).map(v=>v.url).join('\n'));
-	}
-	this.cache.info();
-	console.log(`done (${total-failedTotal.length}/${total})`);
-	process.exit(0);
-}
 
 }
