@@ -185,13 +185,24 @@ export default class WikiBatches {
 		let failedTotal = [];
 		console.log(`Edit ${total} in ${batches} batches.`);
 		for (let batchIndex = batches - 1, batchNo = 1; batchIndex >= 0; batchIndex--, batchNo++) {
-			let failedPages = await this.runBatch(browser, batchSize, batchIndex);
-			failedTotal = failedTotal.concat(failedPages);
+			let batchSuccess = 0;
+			try {
+				let failedPages = await this.runBatch(browser, batchSize, batchIndex);
+				failedTotal = failedTotal.concat(failedPages);
+				batchSuccess = batchSize - failedPages.length;
+			} catch (error) {
+				// symbolic fail-page
+				let failedBatch = {title:`BATCH-${batchNo}`, url:`http://localhost/?batch=${batchNo}&error=${encodeURIComponent(err.name)}`, error:true};
+				failedTotal.push(failedBatch);
+				console.warn(`failed batch no ${batchNo}`);
+				console.warn(err.name, err.message);
+			}
+
 			// progress info
 			let done = batchSize * batchNo;
 			let failRate = 100 - Math.round(100 * (done-failedTotal.length) / done);
 			this.cache.info();
-			console.log(`done batch: ${batchSize-failedPages.length}/${batchSize}; total fail rate: ${failRate}%; total progress: ${done}/${total};`);
+			console.log(`done batch: ${batchSuccess}/${batchSize}; total fail rate: ${failRate}%; total progress: ${done}/${total};`);
 		}
 		
 		// done

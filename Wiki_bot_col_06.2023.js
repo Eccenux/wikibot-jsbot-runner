@@ -12,8 +12,8 @@ const batchBot = new WikiBatches(searchUrlTpl, expectedSummary);
 // batchBot.mockSleep = 2_000;
 
 (async () => {
-	const batches = 42;
-	const batchSize = 30;
+	const batches = 55;
+	const batchSize = 20;
 	// const batches = 1;
 	// const batchSize = 3;
 	await batchBot.runBatches(batches, batchSize);
