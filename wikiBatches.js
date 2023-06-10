@@ -5,7 +5,8 @@ import WikiBot from './wikiBot.js';
 import PageCache from './PageCache.js';
 
 import {
-	wsUrl,
+	// wsUrl,
+	wsBrowserPort,
 } from './chrome.config.js'
 
 function sleep(sleepMs) {
@@ -165,8 +166,10 @@ export default class WikiBatches {
 		}
 
 		// connect to current (open) Chrome window
+		const browserURL = `http://127.0.0.1:${wsBrowserPort}`;
 		const browser = await puppeteer.connect({
-			browserWSEndpoint: wsUrl,
+			// browserWSEndpoint: wsUrl,
+			browserURL,
 		});
 
 		return browser;
