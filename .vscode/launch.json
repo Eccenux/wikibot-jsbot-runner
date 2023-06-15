@@ -7,6 +7,15 @@
 		{
 			"type": "node",
 			"request": "launch",
+			"name": "Run current JS",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"program": "${workspaceFolder}\\${file}"
+		},
+		{
+			"type": "node",
+			"request": "launch",
 			"name": "Run col-x",
 			"skipFiles": [
 				"<node_internals>/**"
