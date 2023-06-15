@@ -15,15 +15,35 @@ export default class WikiBot {
 
 	/**
 	 * Open new tab.
-	 * @returns {Page} targetPage.
+	 * @returns {Browser} browser.
 	 */
 	async openTab(browser) {
 		const page = await browser.newPage();
 		await this.initViewport(page);
 		await this.cache.enable(page);
+		await this.disarmUnloadWarning(page);
 		const timeout = 5000;
 		page.setDefaultTimeout(timeout);
 		return page;
+	}
+
+	/**
+	 * Avoid leave-page warning.
+	 * @param {Page} page
+	 */
+	async disarmUnloadWarning(page) {
+		// force to accept the warning
+		page.on("dialog", (dialog) => {
+			if (dialog.type() === "beforeunload") {
+				dialog.accept();
+			}
+		});
+		await page.evaluate(() => {
+			window.onbeforeunload = null;
+			window.addEventListener("load", () => {
+				$(window).off('beforeunload');
+			});
+		});
 	}
 
 	/**
@@ -147,11 +167,6 @@ export default class WikiBot {
 			let wpSummary = document.querySelector('#wpSummary');
 			return wpSummary.value.search(expectedSummary) > 0;
 		}, this.summary);	// pass to evaluate
-
-		// disable leave-page warning
-		await targetPage.evaluate(() => {
-			$(window).off('beforeunload');
-		});
 
 		return summaryFound;
 	}
