@@ -4,8 +4,10 @@ const searchUrlTpl = function(limit, offset) {
 	const query = [
 		`insource:'[[de:'`,
 		/\[\[Kategoria:[^\]]+\]\].{1,5}\[\[de:/,
+		`-deepcat:"Pistolety"`,
+		`-deepcat:"Karabiny"`,
 	 ];
-
+	 
 	return batchBot.searchUrl(query, limit, offset);
 }
 const expectedSummary = 'interwiki';
@@ -16,7 +18,7 @@ batchBot.ns = [0];	// main
 // batchBot.mockSleep = 2_000;
 
 (async () => {
-	const batches = 16;
+	const batches = 1;
 	const batchSize = 100;
 	// const batches = 1;
 	// const batchSize = 3;
