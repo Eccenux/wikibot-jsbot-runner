@@ -2,8 +2,8 @@ import WikiBatches from './wikiBatches.js';
 
 const searchUrlTpl = function(limit, offset) {
 	const query = [
-		`insource:'[[de:'`,
-		/\[\[Kategoria:[^\]]+\]\].{1,5}\[\[de:/,
+		`insource:'[[en:'`,
+		/\[\[Kategoria:[^\]]+\]\].{1,5}\[\[en:/,
 		`-deepcat:"Pistolety"`,
 		`-deepcat:"Karabiny"`,
 	 ];
@@ -18,7 +18,7 @@ batchBot.ns = [0];	// main
 // batchBot.mockSleep = 2_000;
 
 (async () => {
-	const batches = 1;
+	const batches = 15;
 	const batchSize = 100;
 	// const batches = 1;
 	// const batchSize = 3;
