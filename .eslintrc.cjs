@@ -1,13 +1,25 @@
-/* eslint-disable no-undef */
 module.exports = {
 	"env": {
-		"browser": false,
-		"es2020": true
+		"es2021": true,
+		"node": true
 	},
 	"extends": "eslint:recommended",
+	"overrides": [
+		{
+			"env": {
+				"node": true
+			},
+			"files": [
+				".eslintrc.{js,cjs}"
+			],
+			"parserOptions": {
+				"sourceType": "script"
+			}
+		}
+	],
 	"parserOptions": {
-		"sourceType": "module",
-		"ecmaVersion": 10
+		"ecmaVersion": "latest",
+		"sourceType": "module"
 	},
 	"rules": {
 		"no-prototype-builtins": "off",
@@ -22,4 +34,4 @@ module.exports = {
 		//"array-element-newline": ["error", { "multiline": true }]
 		"array-element-newline": ["error", "consistent"]
 	}
-};
+}
