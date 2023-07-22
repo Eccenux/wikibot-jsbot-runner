@@ -1,4 +1,4 @@
-/* global document, console, process */
+// eslint-disable-next-line no-unused-vars
 import puppeteer, { Browser, Page } from 'puppeteer'; // v13.0.0 or later
 
 import WikiBot from './wikiBot.js';
@@ -102,6 +102,7 @@ export default class WikiBatches {
 			} else {
 				await sleep(this.mockSleep);
 			}
+		// eslint-disable-next-line no-unused-vars
 		})().catch(err => {
 			ok = false;
 			failed = {title, url, error:true};
@@ -216,7 +217,7 @@ export default class WikiBatches {
 	}
 
 	/** @private Open many. */
-	async openTabs(urls, browser) {
+	async openTabs(urls, browser, bot) {
 		let tabCount = 5;
 		if (tabCount > urls.length) {
 			tabCount = urls.length;
@@ -287,6 +288,10 @@ export default class WikiBatches {
 	}
 	/** Run all. */
 	async runBatches(batches, batchSize) {
+		const searchUrlExample = this.searchUrlTpl(batchSize, 0);
+		console.log("Search url (start page): %s\n\n", searchUrlExample);
+		await sleep(2000);
+		
 		// connect to current (open) Chrome window
 		const browser = await this.init();
 		

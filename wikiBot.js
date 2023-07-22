@@ -1,3 +1,4 @@
+/* global $ */
 import {
 	scrollIntoViewIfNeeded,
 	waitForSelectors,
