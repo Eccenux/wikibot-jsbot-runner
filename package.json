@@ -2,7 +2,7 @@
 	"name": "wikibot-jsbot-runner",
 	"type": "module",
 	"dependencies": {
-		"puppeteer": "21.3.x"
+		"puppeteer-core": "24.6.x"
 	},
 	"devDependencies": {
 		"eslint": "8.x"
